@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM {ARG_FROM}
+FROM alpine
 
-ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
+COPY gopath/bin/main /backend
 
 # This would be nicer as `nobody:nobody` but distroless has no such entries.
-USER 65535:65535
+#USER 65535:65535
 
-ENTRYPOINT ["/{ARG_BIN}"]
+ENTRYPOINT ["/backend"]

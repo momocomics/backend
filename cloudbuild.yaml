@@ -1,12 +1,11 @@
-# https://console.cloud.google.com/cloud-build/builds?project=thockin-gce-public&authuser=1
 steps:
-  - name: gcr.io/cloud-builders/docker
-    entrypoint: make
-    env:
-      - GOOS="fake"   # the Makefile looks for these,
-      - GOARCH="fake" # even if it won't need them
-      - VERSION=$SHORT_SHA
-    args:
-      - test
-      - all-container
+- name: 'gcr.io/cloud-builders/go'
+  args: ['install', 'cmd/backend/main.go']
+  env: ['PROJECT_ROOT=backend']
+#- name: 'gcr.io/cloud-builders/go'
+#  args: ['test', 'backend']
+#  env: ['PROJECT_ROOT=backend']
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/backend', '.']
+images: ['gcr.io/$PROJECT_ID/backend']
 timeout: 300s
