@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  selector:
+    matchLabels:
+      app: backend
+      role: data
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+        role: data
+    spec:
+#      restartPolicy: Never
+      containers:
+      - name: backend
+        image: gcr.io/gcore-dev01/backend:staging
+#        env:
+#        - name: DB_HOST
+#          value: cookieshop-db
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 30018
+        ports:
+        - containerPort: 30018

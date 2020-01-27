@@ -2,14 +2,14 @@ package rest
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/momocomics/backend/pkg/get"
-	"github.com/momocomics/backend/pkg/storage"
+	"github.com/momocomics/backend/pkg/api"
+	"github.com/momocomics/backend/pkg/config"
 )
 
-func Routes(e *gin.Engine, db storage.DB) {
+func Routes(e *gin.Engine, sc *config.ServerConfig) {
 
 	v1 := e.Group("/api/v1")
 
-	get.GetBook(v1, db)
+	v1.GET("/book/:id", api.GetBookFn(sc))
 
 }

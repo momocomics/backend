@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/momocomics/backend/pkg/config"
 	"github.com/momocomics/backend/pkg/http/rest"
 	storage "github.com/momocomics/backend/pkg/storage/nosql"
 )
@@ -13,6 +14,7 @@ import (
 func main() {
 	ctx := context.Background()
 	db, err := storage.NewGcs(ctx, "", "gcore")
+	cfg := config.New(db)
 
 	if err != nil {
 		log.Fatal(err)
@@ -21,8 +23,8 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Backend running.")
 	})
-	rest.Routes(r, db)
+	rest.Routes(r, cfg)
 
 	//http.ListenAndServe("8080", gin)
-	r.Run(":8080")
+	r.Run(":30018")
 }

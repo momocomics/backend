@@ -5,6 +5,6 @@ import (
 	"io"
 )
 
-type DB interface {
+type Database interface {
 	Get(ctx context.Context, path string) (io.ReadCloser, error)
 }

@@ -1,8 +1,10 @@
 FROM alpine
 
-COPY gopath/bin/main /backend
+#COPY gopath/bin/main /backend
+COPY backend /backend
 
 # This would be nicer as `nobody:nobody` but distroless has no such entries.
 #USER 65535:65535
+EXPOSE 30018
 
 ENTRYPOINT ["/backend"]

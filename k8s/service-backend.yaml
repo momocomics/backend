@@ -1,0 +1,15 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend
+  labels:
+    app: backend
+    role: data
+spec:
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 30018
+  selector:
+    role: data
+    app: backend

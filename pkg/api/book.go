@@ -1,4 +1,4 @@
-package get
+package api
 
 import (
 	"context"
@@ -6,17 +6,17 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/momocomics/backend/pkg/dto"
-	"github.com/momocomics/backend/pkg/storage"
+	"github.com/momocomics/backend/pkg/config"
+	"github.com/momocomics/backend/pkg/entity"
 )
 
-func GetBook(rg *gin.RouterGroup, db storage.DB) {
-	rg.GET("/book/:id", func(c *gin.Context) {
+func GetBookFn(cfg *config.ServerConfig) func(*gin.Context) {
+	return func(c *gin.Context) {
 
 		ctx := context.Background()
 
 		id := c.Param("id")
-		rc, err := db.Get(ctx, id)
+		rc, err := cfg.Db().Get(ctx, id)
 		if err != nil {
 			c.AbortWithError(http.StatusNotFound, err)
 			return
@@ -34,6 +34,5 @@ func GetBook(rg *gin.RouterGroup, db storage.DB) {
 			Title:   id,
 			Content: string(data),
 		})
-
-	})
+	}
 }

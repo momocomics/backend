@@ -1,11 +1,67 @@
+options:
+  substitution_option: 'ALLOW_LOOSE'
+  env:
+  - GO111MODULE=on
+  - GOPROXY=https://proxy.golang.org
+  - CLOUDSDK_COMPUTE_ZONE=us-central1-a
+  - CLOUDSDK_CONTAINER_CLUSTER=gcore-kubeflow
+#  - CGO_ENABLED=0  #This tool builder sets CGO_ENABLED=0, so that all binaries are linked statically.
+  volumes:
+  - name: go-modules
+    path: /go
 steps:
 - name: 'gcr.io/cloud-builders/go'
-  args: ['install', 'cmd/backend/main.go']
-  env: ['PROJECT_ROOT=backend']
+  args: ['build','-i','-o','backend', 'cmd/backend/main.go']
+  env: ['PROJECT_ROOT=momocomics']
 #- name: 'gcr.io/cloud-builders/go'
 #  args: ['test', 'backend']
 #  env: ['PROJECT_ROOT=backend']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '--tag=gcr.io/$PROJECT_ID/backend', '.']
-images: ['gcr.io/$PROJECT_ID/backend']
+  args:
+  - build
+  #  - --tag=gcr.io/$PROJECT_ID/backend:$SHORT_SHA
+  #  - --tag=gcr.io/$PROJECT_ID/backend:$TAG_NAME
+  - --tag=gcr.io/$PROJECT_ID/backend:staging
+  - --tag=gcr.io/$PROJECT_ID/backend:latest
+  - .
+- name: "gcr.io/cloud-builders/docker"
+  args: ["push", "gcr.io/$PROJECT_ID/backend:staging"]
+
+- id: 'make namespace'
+  name: 'gcr.io/cloud-builders/kubectl'
+  args: ['create','namespace','test-$BUILD_ID']
+  waitFor: ['-'] # start immediately
+
+- id: 'patch k8s config'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'bash'
+  args: ['-c','find k8s -type f | xargs sed -i "s/PROJECT_ID/$PROJECT_ID/g"']
+  waitFor: ['-']
+
+- name: "gcr.io/cloud-builders/gke-deploy:stable"
+  args:
+  - run
+  - --filename=k8s/
+  - --image=gcr.io/$PROJECT_ID/backend:test
+#  - --location=[LOCATION]
+#  - --cluster=[CLUSTER]
+  - --namespace=test-$BUILD_ID
+
+  ### TAG_NAME could be subed by gcloud builds submit --config=cloudbuild.yaml --substitutions=TAG_NAME="test"
+images:
+#  - 'gcr.io/$PROJECT_ID/backend:$SHORT_SHA'
+#  - 'gcr.io/$PROJECT_ID/backend:$TAG_NAME'
+- 'gcr.io/$PROJECT_ID/backend:latest'
 timeout: 300s
+
+# use gcr.io/cloud-builders/go
+#- name: 'gcr.io/cloud-builders/go'
+#  args: ['build','-i','-o','backend', 'cmd/backend/main.go']
+#  env: ['PROJECT_ROOT=momocomics']
+
+#use 'mirror.gcr.io/library/golang'
+#- name: golang
+#  args: ['go','build','-i','-o','backend', 'cmd/backend/main.go']
+#  env: ['GO111MODULE=on']
+
+tags: ['backend']
