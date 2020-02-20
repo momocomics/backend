@@ -1,12 +1,21 @@
 options:
   substitution_option: 'ALLOW_LOOSE'
   env:
+#  - GO111MODULE=on
+#  - GOPROXY=https://proxy.golang.org
   - CLOUDSDK_COMPUTE_ZONE=us-central1-a
   - CLOUDSDK_CONTAINER_CLUSTER=gcore-kubeflow
+#  - CGO_ENABLED=0  #This tool builder already sets CGO_ENABLED=0, so that all binaries are linked statically.
   volumes:
   - name: go-modules
     path: /go
 steps:
+- name: 'gcr.io/cloud-builders/go:debian'
+  args: ['build','-i','-o','backend', 'cmd/backend/main.go']
+  env: ['PROJECT_ROOT=momocomics']
+#- name: 'gcr.io/cloud-builders/go'
+#  args: ['test', 'backend']
+#  env: ['PROJECT_ROOT=backend']
 - name: 'gcr.io/cloud-builders/docker'
   args:
   - build

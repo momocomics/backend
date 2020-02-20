@@ -20,6 +20,7 @@ spec:
       containers:
       - name: backend
         image: gcr.io/gcore-dev01/backend:staging
+#        image: gcr.io/PROJECT_ID/backend:staging
 #        env:
 #        - name: DB_HOST
 #          value: cookieshop-db
