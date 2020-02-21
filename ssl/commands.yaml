@@ -1,0 +1,2 @@
+#good for alias, eg kcn    kcn 'a namespace'
+kubectl config set-context $(kubectl config current-context) --namespace xxx

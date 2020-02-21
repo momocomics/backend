@@ -4,7 +4,8 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     # add an annotation indicating the issuer to use. https://cert-manager.io/docs/usage/ingress/#supported-annotations
-#    cert-manager.io/cluster-issuer: nameOfClusterIssuer
+    #    cert-manager.io/cluster-issuer: nameOfClusterIssuer
+    cert-manager.io/issuer: letsencrypt-prod
   name: nginx
 #  namespace: foo
 spec:
@@ -19,6 +20,6 @@ spec:
   # This section is only required if TLS is to be enabled for the Ingress
   tls:
     - hosts:
-        - www.chrisge.net
+#        - www.chrisge.net
         - chrisge.net
-      secretName: chrisge-net-tls
+      secretName: chrisge-net-letsencrypt-tls

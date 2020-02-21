@@ -1,0 +1,18 @@
+#From the caching layer, the suffix of the request is examined and then forwarded to the appropriate DNS, based on the following cases:
+#
+#Names with the cluster suffix, for example “.cluster.local”: The request is sent to kube-dns.
+#
+#Names with the stub domain suffix, for example “.acme.local”: The request is sent to the configured custom DNS resolver, listening for example at 1.2.3.4.
+#
+#Names without a matching suffix, for example “widget.com”: The request is forwarded to the upstream DNS, for example Google public DNS servers at 8.8.8.8 and 8.8.4.4.
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-dns
+  namespace: kube-system
+data:
+#  stubDomains: |
+#    {"acme.local": ["1.2.3.4"]}
+  upstreamNameservers: |
+    ["8.8.8.8", "8.8.4.4"]
