@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    networking.gke.io/managed-certificates: chrisge-net-certificate
+  name: nginx
+#  namespace: foo
+spec:
+  rules:
+    - host: chrisge.net
+      http:
+        paths:
+          - backend:
+              serviceName: nginx
+              servicePort: 80
+            path: /
