@@ -2,9 +2,9 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   annotations:
-    kubernetes.io/ingress.class: nginx
-    networking.gke.io/managed-certificates: chrisge-net-certificate
-  name: nginx
+    kubernetes.io/ingress.class: gce
+#    networking.gke.io/managed-certificates: chrisge-net-certificate
+  name: ingress-gce
 #  namespace: foo
 spec:
   rules:

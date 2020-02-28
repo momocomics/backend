@@ -5,7 +5,7 @@ helm install  nginx-ing stable/nginx-ingress
 
 kubectl run nginx --image=nginx
 
-kubectl expose deployment nginx --port 80
+kubectl expose deployment nginx --port 80 --target-port=80  --type=NodePort
 
 kubectl apply -f ingress.yaml
 
