@@ -9,7 +9,7 @@ spec:
   type: LoadBalancer
   ports:
   - protocol: TCP
-    port: 30018
+    port: 8081
   selector:
     role: data
     app: backend

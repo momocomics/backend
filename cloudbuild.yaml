@@ -18,25 +18,25 @@ steps:
 - name: "gcr.io/cloud-builders/docker"
   args: ["push", "gcr.io/$PROJECT_ID/backend:staging"]
 
-- id: 'make namespace'
-  name: 'gcr.io/cloud-builders/kubectl'
-  args: ['create','namespace','staging-$BUILD_ID']
-  waitFor: ['-'] # start immediately
-
-- id: 'patch k8s config'
-  name: 'gcr.io/cloud-builders/gcloud'
-  entrypoint: 'bash'
-  args: ['-c','find k8s -type f | xargs sed -i "s/PROJECT_ID/$PROJECT_ID/g"']
-  waitFor: ['-']
-
-- name: "gcr.io/cloud-builders/gke-deploy:stable"
-  args:
-  - run
-  - --filename=k8s/
-#  - --image=gcr.io/$PROJECT_ID/backend:staging  #will override the Dockerfile
-#  - --location=[LOCATION]
-#  - --cluster=[CLUSTER]
-  - --namespace=staging-$BUILD_ID
+#- id: 'make namespace'
+#  name: 'gcr.io/cloud-builders/kubectl'
+#  args: ['create','namespace','staging-$BUILD_ID']
+#  waitFor: ['-'] # start immediately
+#
+#- id: 'patch k8s config'
+#  name: 'gcr.io/cloud-builders/gcloud'
+#  entrypoint: 'bash'
+#  args: ['-c','find k8s -type f | xargs sed -i "s/PROJECT_ID/$PROJECT_ID/g"']
+#  waitFor: ['-']
+#
+#- name: "gcr.io/cloud-builders/gke-deploy:stable"
+#  args:
+#  - run
+#  - --filename=k8s/
+##  - --image=gcr.io/$PROJECT_ID/backend:staging  #will override the Dockerfile
+##  - --location=[LOCATION]
+##  - --cluster=[CLUSTER]
+#  - --namespace=staging-$BUILD_ID
 
   ### TAG_NAME could be subed by gcloud builds submit --config=cloudbuild.yaml --substitutions=TAG_NAME="test"
 images:

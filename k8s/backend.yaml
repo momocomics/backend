@@ -27,6 +27,6 @@ spec:
         readinessProbe:
           httpGet:
             path: /
-            port: 30018
+            port: 8081
         ports:
-        - containerPort: 30018
+        - containerPort: 8081
