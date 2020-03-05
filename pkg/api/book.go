@@ -34,5 +34,6 @@ func GetBookFn(cfg *config.ServerConfig) func(*gin.Context) {
 			Title:   id,
 			Content: string(data),
 		})
+
 	}
 }

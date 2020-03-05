@@ -16,6 +16,7 @@ helm install \
 
 
 openssl genrsa -out ca.key 2048
+openssl genrsa 512
 
 
 cp /etc/ssl/openssl.cnf openssl_cp.cnf
