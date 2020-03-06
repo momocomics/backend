@@ -1,31 +1,34 @@
 package api
 
 import (
-	"context"
+	"crypto/rsa"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/momocomics/backend/pkg/config"
+	"github.com/momocomics/backend/pkg/entity"
 )
 
-//TODO: this is a test key. Create prod key and add it to k8s secret
-var srt = []byte(`-----BEGIN RSA PRIVATE KEY-----
-MIIBPAIBAAJBAMexg5p7etfjyJUO2Oz8vw5rxm0MC3wNsNEi1wInXGRwnUFWkQjN
-6Jc0Y+t+eSYcvTpusprEecnJOKvrf+b7URcCAwEAAQJBAIFU0aQipuvdxdHsHMhX
-5TFk0c1cSK/eeg7o3pGxhmAxfZLSQr73vP54Bk7xaaatOqqjCTUN0nixbEOeh18d
-7DECIQD0fh2cf0xzQ07K3Fo6b1KAnjL4gR7XAJ/3rlXDAdUyCQIhANEXnSmU0tbf
-CiYsqqloZTpZbpop6dEjt1vAWA++YLIfAiEAupvLtBgBXPRhnjpDb9hp6xtUIhJD
-XKzwa9YXRUkP1SkCIQCnorYHQ2Eykklxx7ff8GnQOSlagiYK3gbAkdpIbQrbYwIg
-STU47xTbB232EokQn4/ATVNXuYpRuFcLlIYeBNaB0aA=
------END RSA PRIVATE KEY-----`)
+const (
+	JwtTtl = 1 * time.Minute
+	Issuer = "momocomic-backend"
+)
 
-func Signin(cfg *config.ServerConfig) func(*gin.Context) {
+//TODO: use real db
+var users = map[string]string{
+	"user1": "password1",
+	"user2": "password2",
+}
+
+func SigninFn(cfg *config.ServerConfig) func(*gin.Context) {
 	return func(c *gin.Context) {
-		var account Account
-		ctx := context.Background()
-
+		var account entity.Account
 		err := json.NewDecoder(c.Request.Body).Decode(&account)
 
 		if err != nil {
@@ -35,25 +38,82 @@ func Signin(cfg *config.ServerConfig) func(*gin.Context) {
 			return
 		}
 
+		//TODO:read from db
+		pwd, ok := users[account.Username]
+
+		if !ok || pwd != account.Password {
+			c.Writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		tokenString, err := signToken(c.Request, account, cfg.PrivateKey())
+
+		if err != nil {
+			c.Writer.WriteHeader(http.StatusInternalServerError)
+			c.Writer.WriteString("error while signing token")
+			log.Printf("Token signing error: %v\n", err)
+		}
+		/*
+			  // true means no scripts, http requests only. This has
+			  // nothing to do with https vs http
+			  HttpOnly: true,
+
+			// Defaults to host-only, which means exact subdomain
+			  // matching. Only change this to enable subdomains if you
+			  // need to! The below code would work on any subdomain for
+			  // yoursite.com
+			  Domain: "yoursite.com",
+
+			// Defaults to any path on your app, but you can use this
+			  // to limit to a specific subdirectory. Eg:
+			  Path: "/app/",
+		*/
+		c.SetCookie("token", tokenString, int(JwtTtl.Seconds()), "/", cfg.Domain(), true, true)
+		//c.Header("Content-Type", "application/jwt")
+		//c.Writer.WriteHeader(http.StatusOK)
+		if cfg.IsDebug() {
+			c.JSON(http.StatusOK, fmt.Sprintf("Token: %s", tokenString))
+		}
+
 	}
 }
 
-func signToken(c Claims) (string, error) {
+func signToken(r *http.Request, account entity.Account, key *rsa.PrivateKey) (string, error) {
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(srt)
-	if err != nil {
-		return "", err
+	c := &entity.Claims{
+		Username:  account.Username,
+		UserAgent: r.UserAgent(),
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(JwtTtl).Unix(),
+			Id:        uuid.New().String(),
+			IssuedAt:  time.Now().Unix(),
+			Issuer:    Issuer,
+		},
 	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	return token.SignedString(key)
 }
 
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
+func VerifyToken(token string, key *rsa.PublicKey) (*jwt.Token, error) {
+
+	t, err := jwt.Parse(token, func(token *jwt.Token) (i interface{}, e error) {
+		return key, nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("couldn't parse token: %v", err)
+	}
+
+	if !t.Valid {
+		return nil, fmt.Errorf("token is invalid")
+	}
+
+	return t, nil
+
 }
 
-type Account struct {
-	Password string `json:"password"`
-	Username string `json:"username"`
+func RefreshTokenFn(cfg *config.ServerConfig) func(*gin.Context) {
+	return func(c *gin.Context) {
+
+	}
 }

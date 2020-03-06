@@ -29,7 +29,7 @@ func GetBookFn(cfg *config.ServerConfig) func(*gin.Context) {
 			return
 		}
 
-		c.JSON(http.StatusOK, dto.Book{
+		c.JSON(http.StatusOK, entity.Book{
 			ID:      id,
 			Title:   id,
 			Content: string(data),
