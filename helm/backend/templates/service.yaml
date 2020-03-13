@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: backend-rest-services
+  name: backend-api
   labels:
-    service: rest
+    service: api
     env: {{ .Values.env }}
     component: backend
 spec:
@@ -14,6 +14,6 @@ spec:
       protocol: TCP
       name: http
   selector:
-    service: rest
+    service: api
     env: {{ .Values.env }}
     component: backend

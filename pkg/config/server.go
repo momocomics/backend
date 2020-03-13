@@ -26,6 +26,6 @@ func (c *ServerConfig) IsDebug() bool {
 	return c.debug
 }
 
-func (c *ServerConfig) setDebug(debug bool) {
+func (c *ServerConfig) SetDebug(debug bool) {
 	c.debug = debug
 }

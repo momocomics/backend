@@ -2,9 +2,9 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: backend-rest-services
+  name: backend-api
   labels:
-    service: backend_rest
+    service: backend_api
     env: {{ .Values.env }}
   {{- with .Values.ingress.annotations }}
   annotations:

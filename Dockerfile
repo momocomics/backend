@@ -10,6 +10,6 @@ FROM gcr.io/distroless/base
 COPY --from=build-env /backend /
 # This would be nicer as `nobody:nobody` but distroless has no such entries.
 #USER 65535:65535
-EXPOSE 30018
+EXPOSE 8081
 
 ENTRYPOINT ["/backend"]

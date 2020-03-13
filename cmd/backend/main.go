@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+
 	"github.com/momocomics/backend/pkg/config"
 	"github.com/momocomics/backend/pkg/http/rest"
 	storage "github.com/momocomics/backend/pkg/storage/nosql"
@@ -16,22 +18,34 @@ import (
 // generate pk - openssl genrsa -out app.rsa 512(keysize)
 // generate pub key - openssl rsa -in app.rsa -pubout > app.rsa.pub
 var signBytes = []byte(`-----BEGIN RSA PRIVATE KEY-----
-MIIBPAIBAAJBAMexg5p7etfjyJUO2Oz8vw5rxm0MC3wNsNEi1wInXGRwnUFWkQjN
-6Jc0Y+t+eSYcvTpusprEecnJOKvrf+b7URcCAwEAAQJBAIFU0aQipuvdxdHsHMhX
-5TFk0c1cSK/eeg7o3pGxhmAxfZLSQr73vP54Bk7xaaatOqqjCTUN0nixbEOeh18d
-7DECIQD0fh2cf0xzQ07K3Fo6b1KAnjL4gR7XAJ/3rlXDAdUyCQIhANEXnSmU0tbf
-CiYsqqloZTpZbpop6dEjt1vAWA++YLIfAiEAupvLtBgBXPRhnjpDb9hp6xtUIhJD
-XKzwa9YXRUkP1SkCIQCnorYHQ2Eykklxx7ff8GnQOSlagiYK3gbAkdpIbQrbYwIg
-STU47xTbB232EokQn4/ATVNXuYpRuFcLlIYeBNaB0aA=
------END RSA PRIVATE KEY-----`)
+                        MIIBOgIBAAJBAJVKVZSF/8PIzJ1uoVrorfcjaULg4ZCtSHeTB6b9QnLJ/x6FXNBu
+                        DxOR5dFhqiHpPtNhpS9mqQT9V3I6qXfGgzcCAwEAAQJAXsPl2TbKKPyQriqosC1d
+                        KLDIw5Q+evkUNBsX02+WO4h3gCZeGouhGebaMgno1pUzsSal0W9U9XWnumWnkGwr
+                        gQIhAMR9b00nFTjLMvRoi0R87nUNRgdhk431wfVmJopYU0VBAiEAwoFYoVz4Dckp
+                        csRfg7bsb6HfcIlxncvNV2aleN/C0ncCICE/4J+7p1mu+PZm4no6cdeY4WrKVj/F
+                        gIbYPFlYzO6BAiEAtb5Qx65sJc2CijeNnDBvarvRYYE8BZrqSzGhinlivG8CIG9r
+                        CwQbSEUWg/snnrIOJH4O89fY9c/OZW48MLzsdyrh
+                        -----END RSA PRIVATE KEY-----`)
+var verifyBytes = []byte(`-----BEGIN PUBLIC KEY-----
+                          MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJVKVZSF/8PIzJ1uoVrorfcjaULg4ZCt
+                          SHeTB6b9QnLJ/x6FXNBuDxOR5dFhqiHpPtNhpS9mqQT9V3I6qXfGgzcCAwEAAQ==
+                          -----END PUBLIC KEY-----`)
 
 func main() {
 	ctx := context.Background()
 	db, err := storage.NewGcs(ctx, "", "gcore")
 	fatal(err)
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
+	//if s, ok := signBytes.([]byte);!ok{
+	//
+	//}
+	signBytes = regexp.MustCompile(`\s*$`).ReplaceAll(signBytes, []byte{})
+	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(signBytes)
 	fatal(err)
-	cfg := config.New(db, key)
+	verifyBytes = regexp.MustCompile(`\s*$`).ReplaceAll(verifyBytes, []byte{})
+	pubkey, err := jwt.ParseRSAPublicKeyFromPEM(verifyBytes)
+	fatal(err)
+	cfg := config.New(db, privKey, pubkey, "momocomic.com")
+	cfg.SetDebug(true)
 	r := gin.Default()
 	r.GET("/", func(c *gin.Context) {
 		c.String(http.StatusOK, "Backend running.")

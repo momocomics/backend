@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend-rest-services
+  name: backend-api
   labels:
-    app.kubernetes.io/name: backend-rest-services
+    app.kubernetes.io/name: backend-api
 #    app.kubernetes.io/instance: backend_rest_
 #    app.kubernetes.io/version: "0.0.1"
     app.kubernetes.io/managed-by: helm
@@ -13,18 +13,18 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-       service: rest
+      service: api
        env: {{ .Values.env }}
        component: backend
   template:
     metadata:
       labels:
-        service: rest
+        service: api
         env: {{ .Values.env }}
         component: backend
     spec:
       containers:
-        - name: rest
+        - name: api
           image: "{{ .Values.image.repository }}:latest"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
