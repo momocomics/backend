@@ -1,0 +1,18 @@
+replicaCount: 1
+env: dev
+
+image:
+  repository: gcr.io/gcore-dev01/grpc-server
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8090
+  targetPort: 8090
+
+resources: {}
+
+
+envVar:
+  gcpProjectId: gcore-dev01
+  firestoreCollection: todo

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: grpc-server
+    labels:
+        app.kubernetes.io/name: grpc-server
+        app.kubernetes.io/managed-by: helm
+        app.kubernetes.io/component: server
+        app.kubernetes.io/part-of: backend
+spec:
+    replicas: {{ .Values.replicaCount }}
+    selector:
+        matchLabels:
+            service: grpc-server
+            env: {{ .Values.env }}
+            component: backend
+    template:
+        metadata:
+            labels:
+                service: grpc-server
+                env: {{ .Values.env }}
+                component: backend
+        spec:
+            containers:
+                - name: grpc-server
+                  image: "{{ .Values.image.repository }}:latest"
+                  imagePullPolicy: {{ .Values.image.pullPolicy }}
+                  env:
+                      - name: GCP_PROJECT_ID
+                        value: {{ .Values.envVar.gcpProjectId }}
+                      - name: FIRESTORE_COLLECTION
+                        value: {{ .Values.envVar.firestoreCollection }}
+                  ports:
+                      - name: http
+                        containerPort: {{ .Values.service.targetPort }}
+                        protocol: TCP
+                    #          livenessProbe:
+                    #            httpGet:
+                    #              path: /
+                    #              port: http
+                    #          readinessProbe:
+                    #            httpGet:
+                    #              path: /
+                    #              port: http
+                  resources:
+        {{- toYaml .Values.resources | nindent 12 }}

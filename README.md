@@ -1,12 +1,23 @@
 # Backend API
 
+Backend server of momocomics.com
+
 **Complete**
-  * SSL
   * Cloud Build setup
   * Helm Chart
-  * Cert Manager setup
+  * Rest API    
+  * gRPC
+  * Firestore
+  * Skaffold
+
+**Build and Deploy services**
+ 
+  ***Option 1***
+  * cd grpc-server
+  * gcloud builds submit .
+  * helm install grpc-server helm/
   
-**In progress**
-  * Rest API
-    * JWT  
+  ***Option 2***
+  * skaffold run
+
     
